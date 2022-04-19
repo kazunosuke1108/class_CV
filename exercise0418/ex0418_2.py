@@ -1,6 +1,8 @@
 import numpy as np
 import cv2 as cv
 import glob
+
+
 # termination criteria
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
@@ -27,10 +29,12 @@ for fname in images:
         cv.imshow('img', img)
         ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
         print(f"==============Analysis result of {fname}==============")
-        print(f"focal length : {mtx[0,0]} or {mtx[1,1]}")
-        print(f"u0: {mtx[0,2]}")
-        print(f"v0: {mtx[1,2]}")
-
+        print(f"focal length: {mtx[0,0]}pixel or {mtx[1,1]}pixel")
+        print(f"focal length: {mtx[0,0]*1.7}μm or {mtx[1,1]*1.7}μm")
+        print(f"u0: {mtx[0,2]*1.7}pixel")
+        print(f"v0: {mtx[1,2]*1.7}μm")
+        print(f"u0: {mtx[0,2]*1.7}pixel")
+        print(f"v0: {mtx[1,2]*1.7}μm")
         cv.waitKey(500)
     else:
         print("chess board not found in the image:",fname)
