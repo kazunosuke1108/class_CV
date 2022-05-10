@@ -93,4 +93,4 @@ for i in range(len(img)-1):
     ax.plot(t_x,t_y,accum)
     plt.show()
 #完成した画像を保存
-canvas=cv.imwrite("canvas.jpg",canvas)
+canvas=cv.imwrite("exercise0509/canvas.jpg",canvas)
