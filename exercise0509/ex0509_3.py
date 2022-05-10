@@ -58,13 +58,13 @@ img_h = cv.imread('exercise0509/img_data/IMG_8231.jpg', cv.IMREAD_GRAYSCALE)
 img=[img_a,img_b,img_c,img_d,img_e,img_f,img_g,img_h]
 
 # 結果出力のキャンバスを作成
-canvas_h,canvas_w=1500,2500
+canvas_h,canvas_w=1500,1500
 canvas=np.zeros((canvas_h,canvas_w))
 canvas+=255
 height,width=img_a.shape
 
 # 1枚目の写真を貼る
-vector_root=np.array([300,500])
+vector_root=np.array([300,100])
 canvas[int(vector_root[0]):int(vector_root[0])+height,int(vector_root[1]):int(vector_root[1])+width]=img_a
 
 # 写真を2枚ずつ比べ、2枚目の方だけを描画
