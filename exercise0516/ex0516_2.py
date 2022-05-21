@@ -4,6 +4,7 @@ import scipy.optimize as op
 from scipy.signal import butter, lfilter, freqz
 import matplotlib.pyplot as plt
 
+skip=0 # 処理するフレームを削る数。デバッグの時はこれを大きくして処理を切り上げる
 
 def match_feature(img1, img2):  # 前回の課題と同様
     # SIFTを用意
@@ -63,7 +64,8 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
 
 
 # 動画の読み込み
-mv = cv.VideoCapture("exercise0516/prof_likes_hiroyuki3.mp4")
+mv = cv.VideoCapture(
+    "/Users/hayashidekazuyuki/Desktop/Git_Win_Air/class_CV/exercise0516/prof_likes_hiroyuki2.mp4")
 frame_count = int(mv.get(cv.CAP_PROP_FRAME_COUNT))  # フレーム数
 size = (1080, 1920)
 # size=(540,960)
@@ -79,7 +81,7 @@ vec0_list = []
 vec1_list = []
 
 # for i in range(20):
-for i in range(frame_count):
+for i in range(frame_count-skip):
     ch, frame = mv.read()  # １フレームずつ取り出す
     frame = cv.cvtColor(frame, cv.COLOR_RGB2GRAY)  # モノクロに変換
     if i != 0:  # 初回はスキップ
@@ -93,22 +95,43 @@ for i in range(frame_count):
 
 # ベクトルuの平滑化処理
 
-# LPFのパラメータ。試行錯誤的に決定。
+# LPFのパラメータ。試行錯誤的に決定。1Hz以上の高周波振動を除去
 order = 6
 fs = 30.0
-cutoff = 3.667
+cutoff = 1
 T = 5.0
 n = int(T * fs)
+
+fig = plt.figure()
+
+ax1 = fig.add_subplot(2, 1, 1)
+ax2 = fig.add_subplot(2, 1, 2)
+
+ax1.plot(np.linspace(0, len(vec0_list), len(vec0_list)),
+         vec0_list, label="before smoothing, x")
+ax2.plot(np.linspace(0, len(vec1_list), len(vec1_list)),
+         vec1_list, label="before smoothing, y")
+#plt.plot(vec0_list,vec1_list,label="before smoothing",color="r")
 
 vec0_list = butter_lowpass_filter(
     vec0_list, cutoff, fs, order)  # スタビライズベクトルの高周波成分の消去
 vec1_list = butter_lowpass_filter(vec1_list, cutoff, fs, order)
+ax1.plot(np.linspace(0, len(vec0_list), len(vec0_list)),
+         vec0_list, label="after smoothing, x")
+ax2.plot(np.linspace(0, len(vec1_list), len(vec1_list)),
+         vec1_list, label="after smoothing, y")
+#plt.plot(vec0_list,vec1_list,label="after smoothing",color="b")
+ax1.legend()
+ax2.legend()
+plt.xlabel("t")
+plt.ylabel("x or y")
+plt.savefig("class_CV/exercise0516/result/smoothing.png")
 
-
-mv2 = cv.VideoCapture("exercise0516/prof_likes_hiroyuki3.mp4")
+mv2 = cv.VideoCapture(
+    "/Users/hayashidekazuyuki/Desktop/Git_Win_Air/class_CV/exercise0516/prof_likes_hiroyuki2.mp4")
 
 # for i in range(19):
-for i in range(0, frame_count-1):
+for i in range(0, frame_count-1-skip):
     ch, frame = mv2.read()  # １フレームずつ取り出す
     if ch:
         frame = cv.cvtColor(frame, cv.COLOR_RGB2GRAY)  # モノクロに変換
@@ -133,4 +156,30 @@ print("保存しました")
 
 mv2.release()  # ファイルを閉じる
 save.release()
-cv.destroyAllWindows()  # ウインドウを閉じる
+
+# 2つの動画を並べて１つの動画を作る
+mv_combine1 = cv.VideoCapture(
+    "/Users/hayashidekazuyuki/Desktop/Git_Win_Air/class_CV/exercise0516/prof_likes_hiroyuki2.mp4")
+mv_combine2 = cv.VideoCapture(
+    "/Users/hayashidekazuyuki/Desktop/Git_Win_Air/class_CV/exercise0516/result/stabilized.mp4")
+
+frame_rate_combine = min(int(mv_combine1.get(cv.CAP_PROP_FRAME_COUNT)), int(
+    mv_combine2.get(cv.CAP_PROP_FRAME_COUNT)))
+fourcc = cv.VideoWriter_fourcc('m', 'p', '4', 'v')  # 保存形式
+height = mv_combine1.get(cv.CAP_PROP_FRAME_HEIGHT) + \
+    mv_combine2.get(cv.CAP_PROP_FRAME_HEIGHT)
+width = mv_combine1.get(cv.CAP_PROP_FRAME_WIDTH) + \
+    mv_combine2.get(cv.CAP_PROP_FRAME_WIDTH)
+mv_jointed = cv.VideoWriter("/Users/hayashidekazuyuki/Desktop/Git_Win_Air/class_CV/exercise0516/result/combined.mp4",
+                            fourcc, frame_rate_combine, (int(width), int(height)))
+
+for i in range(frame_rate_combine):  # フレームごとに結合
+    ch1, frame1 = mv_combine1.read()
+    ch2, frame2 = mv_combine2.read()
+    if ch1 and ch2:
+        canvas = np.hstack([frame1, frame2])
+        frame_combine = cv.resize(canvas, (int(width), int(height)))
+        mv_jointed.write(frame_combine)
+
+mv_jointed.release()
+cv.destroyAllWindows()
