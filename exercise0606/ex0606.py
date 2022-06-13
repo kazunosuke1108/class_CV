@@ -43,7 +43,7 @@ def drawlines(img1, img2, lines, pts1, pts2):
 
 
 # 異なる端末でも再現が確実になるように、パスの取得を強化
-os.chdir("class_CV/exercise0606/images")
+os.chdir("/Users/hayashidekazuyuki/Desktop/Git_Win_Air/class_CV/exercise0606/images")
 images_path = os.getcwd()
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.chdir("results")
