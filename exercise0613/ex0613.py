@@ -2,40 +2,40 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-def rectify_pair(image_left, image_right, viz=False):
-    # Initiate SIFT detector
+def matching(img1,img2):
+    r, c = img1.shape
+    img1 = cv2.cvtColor(img1, cv2.COLOR_GRAY2BGR)
+    img2 = cv2.cvtColor(img2, cv2.COLOR_GRAY2BGR)
     sift = cv2.SIFT_create()
-
-    # find the keypoints and descriptors with SIFT
-    kp1, des1 = sift.detectAndCompute(image_left, None)
-    kp2, des2 = sift.detectAndCompute(image_right, None)
-
-    FLANN_INDEX_KDTREE = 0
+    kp1, des1 = sift.detectAndCompute(img1, None)
+    kp2, des2 = sift.detectAndCompute(img2, None)
+    FLANN_INDEX_KDTREE = 1
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
     search_params = dict(checks=50)
-
     flann = cv2.FlannBasedMatcher(index_params, search_params)
-
     matches = flann.knnMatch(des1, des2, k=2)
+    pts1 = []
+    pts2 = []
 
-    # store all the good matches as per Lowe's ratio test
-    good = []
-    for m, n in matches:
-        if m.distance < 0.8 * n.distance:
-            good.append(m)
+    for i, (m, n) in enumerate(matches):
+        if m.distance < 0.8*n.distance:
+            pts2.append(kp2[m.trainIdx].pt)
+            pts1.append(kp1[m.queryIdx].pt)
+    pts1 = np.int32(pts1)
+    pts2 = np.int32(pts2)
+    F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_LMEDS)
+    # inlier pointsだけを使用
+    pts1 = pts1[mask.ravel() == 1]
+    pts2 = pts2[mask.ravel() == 1]
 
-    src_pts = np.float32([kp1[m.queryIdx].pt for m in good])
-    dst_pts = np.float32([kp2[m.trainIdx].pt for m in good])
+    return pts1,pts2,F,mask
 
-    # find the fundamental matrix
-    F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.RANSAC, 3, 0.99)
-    src_pts = src_pts.flatten()
-    dst_pts = dst_pts.flatten()
-    print(image_left.shape[:2])
+def rectify_pair(image_left, image_right, viz=False):
+    pts1,pts2,F,mask=matching(image_left,image_right)
 
     # rectify the images, produce the homographies: H_left and H_right
     retval, H_left, H_right = cv2.stereoRectifyUncalibrated(
-        src_pts, dst_pts, F, image_left.shape[:2])
+        pts1, pts2, F, image_left.shape[:2])
 
     return F, H_left, H_right
 """
@@ -137,8 +137,8 @@ print("result2.png renewed")
 print(H_left,H_right)
 cv2.imwrite("exercise0613/results/left.png",image_left)
 cv2.imwrite("exercise0613/results/right.png",image_right)
-image_left=cv2.cvtColor(image_left,cv2.COLOR_BGR2GRAY)
-image_right=cv2.cvtColor(image_right,cv2.COLOR_BGR2GRAY)
+# image_left=cv2.cvtColor(image_left,cv2.COLOR_BGR2GRAY)
+# image_right=cv2.cvtColor(image_right,cv2.COLOR_BGR2GRAY)
 stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
 disparity = stereo.compute(image_left[:2300,800:],image_right[:2300,800:])
 plt.imshow(disparity,'gray')
