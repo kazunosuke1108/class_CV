@@ -1,9 +1,13 @@
+import sys
+import os
+import time
 import cv2
 import numpy as np
 
 
-
-face_cascade_path = 'class_CV/final_report/haarcascade_frontalface_default.xml'
+path=os.getcwd()
+print(path)
+face_cascade_path = '/home/ytpc2019a/code_ws/class_CV/final_report/haarcascade_frontalface_default.xml'
 face_cascade = cv2.CascadeClassifier(face_cascade_path)
 sift = cv2.SIFT_create()  # インスタンス化
 
@@ -15,18 +19,22 @@ cap2 = cv2.VideoCapture(2)
 print(cap2.isOpened())
 
 
-stereo = cv2.StereoBM_create(numDisparities=16, blockSize=9)
+stereo = cv2.StereoBM_create(numDisparities=128, blockSize=5)
 
 def force_show(name,frame):
     try:
         cv2.imshow(name,frame)
+        print(f"{name} imshow succeeded")
     except cv2.error as e:
         print(f"{name} imshow failed: ",e)
 
 def face_extract(frame):
     face_recog=False
     src_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    print(frame.shape)
     faces = face_cascade.detectMultiScale(src_gray)
+    
+
     for j, (x, y, w, h) in enumerate(faces):
         if w>100 and h>100:
             print("face_size: ",x,y)
@@ -37,7 +45,6 @@ def face_extract(frame):
 
 def gen_disparity(frame1,frame2):
     # 特徴点の抽出~
-    print("-----------------------------------here-----------------------------------")
     print(frame1.shape)
     frame2=cv2.resize(frame2,(frame1.shape[1],frame1.shape[0]))
     frame1=cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY)
@@ -71,8 +78,9 @@ def gen_disparity(frame1,frame2):
         frame2_rect = cv2.warpPerspective(frame2, H2, frame2.shape[:2])
         force_show('frame1_rect',frame1_rect)
         force_show('frame2_rect',frame2_rect)
-        disparity = stereo.compute(frame1_rect, frame2_rect)      
-        print(disparity.shape)  
+        disparity = stereo.compute(frame1, frame2)      
+        print(disparity.shape)
+        disparity=( disparity - np.min(disparity) ) / ( np.max(disparity) - np.min(disparity) )
         cv2.imshow('disparity',disparity)
         return disparity
     except cv2.error:
@@ -82,6 +90,7 @@ def gen_disparity(frame1,frame2):
 
 #起動と画面表示まで
 while(1):
+    print("-----------------------------------loop-----------------------------------")
     #cap1ture frame1の作成
     ret1, frame1 = cap1.read()
     ret2, frame2 = cap2.read()
@@ -94,12 +103,13 @@ while(1):
         force_show('face1',face1)
         force_show('face2',face2)
         try:
-            disparity=gen_disparity(face1,face2)
+            # disparity=gen_disparity(face1,face2)
+            disparity=gen_disparity(frame1,frame2)
             force_show('disparity',disparity)
         except cv2.error:
             pass
-        # except TypeError as e:
-        #     print("disparity failed",e)
+        except TypeError as e:
+            print("disparity failed",e)
     else:
         print("failed to imread")
     k = cv2.waitKey(5) & 0xFF
