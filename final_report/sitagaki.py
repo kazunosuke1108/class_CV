@@ -121,3 +121,18 @@ cap1.release()
 cap2.release()
 # calibする
 # arマーカーの向きを出力する
+
+"""
+現状
+・リアルタイムで画像を２枚
+・顔の切り抜き=video stabilization
+・depth estimation
+
+・超広角壁紙を作る
+
+
+zoomシステム
+・壁紙を作る
+・顔をトラッキングする（距離が遠くなるとwariningを出す）
+・顔を壁紙にぶち込んで出力
+"""
