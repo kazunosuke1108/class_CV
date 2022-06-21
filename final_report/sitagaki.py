@@ -16,7 +16,7 @@ def face_extract(frame):
     for j, (x, y, w, h) in enumerate(faces):
         if w>100 and h>100:
             print(x,y)
-            face=frame[y:y+h,x:x+w]
+            face=frame[y-50:y+h+50,x-100:x+w+100]
             return x,y,w,h,face
     return 0,0,0,0,np.zeros([400,400])
 #起動と画面表示まで
@@ -32,3 +32,6 @@ while(1):
 
 cv2.destroyAllWindows()
 cap.release()
+
+# calibする
+# arマーカーの向きを出力する
