@@ -19,7 +19,7 @@ cap2 = cv2.VideoCapture(2)
 print(cap2.isOpened())
 
 
-stereo = cv2.StereoBM_create(numDisparities=128, blockSize=5)
+stereo = cv2.StereoBM_create(numDisparities=256, blockSize=5)
 
 def force_show(name,frame):
     try:

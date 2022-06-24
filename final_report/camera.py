@@ -1,6 +1,6 @@
 import cv2
 
-cap1 = cv2.VideoCapture(2)
+cap1 = cv2.VideoCapture(0)
 print(cap1.isOpened())
 # cap2 = cv2.VideoCapture(2)
 # print(cap2.isOpened())
