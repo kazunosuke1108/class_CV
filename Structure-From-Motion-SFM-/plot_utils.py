@@ -2,8 +2,8 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-#from mayavi import mlab
-"""
+from mayavi import mlab
+
 def viz_3d(pt_3d):
     X = pt_3d[0,:]
     Y = pt_3d[1,:]
@@ -20,7 +20,7 @@ def viz_3d(pt_3d):
     )
     mlab.axes(xlabel='x', ylabel='y', zlabel='z',ranges=(0,20,0,20,0,10),nb_labels=10)
     mlab.show()
-"""
+
 def viz_3d_matplotlib(pt_3d):
     X = pt_3d[0,:]
     Y = pt_3d[1,:]

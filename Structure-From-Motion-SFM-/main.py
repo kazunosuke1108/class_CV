@@ -3,10 +3,10 @@ import os
 import numpy as np
 
 from bundle_adjustment import bundle_adjustment
-from plot_utils import viz_3d_matplotlib, draw_epipolar_lines#, viz_3d 
+from plot_utils import viz_3d_matplotlib, draw_epipolar_lines, viz_3d 
 
 ######################### Path Variables ##################################################
-curr_dir_path = os.getcwd()
+curr_dir_path = "big_data_NO_GIT/SfM_datas"
 images_dir = curr_dir_path + '/data/images/observatory'
 calibration_file_dir = curr_dir_path + '/data/calibration'
 ###########################################################################################
@@ -164,4 +164,4 @@ if __name__ == "__main__":
     pts_4d.append(Y)
     pts_4d.append(Z)
 
-    viz_3d_matplotlib(np.array(pts_4d))
+    viz_3d(np.array(pts_4d))
