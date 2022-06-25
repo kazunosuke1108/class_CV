@@ -1,3 +1,1 @@
-from datetime import datetime
-
-print(datetime.now().hour)
+import csv

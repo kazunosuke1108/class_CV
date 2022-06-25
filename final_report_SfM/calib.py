@@ -16,8 +16,8 @@ objp[:,:2] = np.mgrid[0:13,0:9].T.reshape(-1,2)
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 mtx_sum=[]
-images = sorted(glob.glob(img_calib+'/*.png'))
-
+images = sorted(glob.glob(img_calib+'/*.jpg'))
+print(images)
 for fname in images:
     img = cv2.imread(fname)
     print(fname)

@@ -6,9 +6,13 @@ from bundle_adjustment import bundle_adjustment
 from plot_utils import viz_3d_matplotlib, draw_epipolar_lines, viz_3d 
 
 ######################### Path Variables ##################################################
-curr_dir_path = "big_data_NO_GIT/SfM_datas"
-images_dir = curr_dir_path + '/data/images/observatory'
-calibration_file_dir = curr_dir_path + '/data/calibration'
+curr_dir_path = "/home/ytpc2019a/code_ws/big_data_NO_GIT/SfM_datas"
+images_dir = curr_dir_path + '/data1/images/observatory'
+calibration_file_dir = curr_dir_path + '/data1/calibration'
+# my data
+images_dir="/home/ytpc2019a/code_ws/class_CV/final_report_SfM/webcam"
+#images_dir="/home/ytpc2019a/code_ws/big_data_NO_GIT/images1"
+images_dir="/home/ytpc2019a/code_ws/big_data_NO_GIT/iphone/Images"
 ###########################################################################################
 
 def get_camera_intrinsic_params():
@@ -23,7 +27,12 @@ def get_camera_intrinsic_params():
         K.append(row1)
         K.append(row2)
         K.append(row3)
-    
+        # 広角カメラ
+        K=np.array([[1634.30188,0,2027.12393],[0.,1639.62261,1471.23072],[0.,0.,1.]])
+        # webcam
+        # K=np.array([[842.50011162,0.,578.89029916],[0.,801.01078582,246.00138272],[0.,0.,1.]])
+        # Kinect
+        # K=np.array([[603.80578513,0,630.30823915],[0,603.88362465,366.13473242],[0,0,1]])
     return K
 
 def get_pinhole_intrinsic_params():
@@ -38,7 +47,11 @@ def get_pinhole_intrinsic_params():
         K.append(row1)
         K.append(row2)
         K.append(row3)
-    
+        # 広角カメラ
+        K=np.array([[1634.30188,0,2027.12393],[0.,1639.62261,1471.23072],[0.,0.,1.]])
+        # Kinect
+        #K=np.array([[603.80578513,0,630.30823915],[0,603.88362465,366.13473242],[0,0,1]])
+
     return K
 
 def rep_error_fn(opt_variables, points_2d, num_pts):
@@ -165,3 +178,4 @@ if __name__ == "__main__":
     pts_4d.append(Z)
 
     viz_3d(np.array(pts_4d))
+    print(get_camera_intrinsic_params())

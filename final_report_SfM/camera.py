@@ -1,11 +1,18 @@
+import imp
 from turtle import st
 import cv2
 import time
 import os
 from datetime import datetime
+import shutil
 current_path=os.getcwd()
-img_calib="class_CV/final_report_SfM/img_calib"
-
+img_dir="class_CV/final_report_SfM/webcam"
+#img_dir="class_CV/final_report_SfM/img_calib"
+try:
+    shutil.rmtree(img_dir)
+except FileNotFoundError:
+    pass
+os.mkdir(img_dir)
 
 ignition=time.time()
 cap1 = cv2.VideoCapture(0)
@@ -32,7 +39,7 @@ while(1):
     if k==ord("c"):
         print("save_img")
         now=str(datetime.now().day)+str(datetime.now().hour)+"_"+str(datetime.now().minute)+"_"+str(datetime.now().second)
-        cv2.imwrite(img_calib+"/"+now+".png",frame1)
+        cv2.imwrite(img_dir+"/"+now+".jpg",frame1)
 
 cap1.release()
 # cap2.release()
