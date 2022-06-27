@@ -1,8 +1,9 @@
 import numpy as np
 import cv2
 import glob
+from pprint import pprint
 
-img_calib="class_CV/final_report_SfM/img_calib"
+img_calib="/home/ytpc2019a/code_ws/class_CV/final_report_SfM/img_calib_normal"
 
 
 # termination criteria
@@ -16,7 +17,7 @@ objp[:,:2] = np.mgrid[0:13,0:9].T.reshape(-1,2)
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 mtx_sum=[]
-images = sorted(glob.glob(img_calib+'/*.jpg'))
+images = sorted(glob.glob(img_calib+'/*.png'))
 print(images)
 for fname in images:
     img = cv2.imread(fname)
@@ -49,5 +50,5 @@ for matrix in mtx_sum:
 K=ave_array/len(mtx_sum)
 print(K)
 
-print(mtx)
+pprint(mtx)
 cv2.destroyAllWindows()
