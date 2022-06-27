@@ -43,6 +43,5 @@ def camera(save_dir_path,cam_num):
             now=str(datetime.now().day)+str(datetime.now().hour)+"_"+str(datetime.now().minute)+"_"+str(datetime.now().second)
             cv2.imwrite(img_dir+"/img"+str(i)+".jpg",frame1)
             i+=1
-
     cap1.release()
     # cap2.release()
