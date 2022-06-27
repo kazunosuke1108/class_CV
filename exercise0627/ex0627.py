@@ -17,7 +17,7 @@ def match_feature(img1, img2):
     good = []  # オブジェクトの保管場所
     good2 = []  # オブジェクトの保管場所 drawMatchesKnnに食わせるための形式
     for m, n in matches:
-        if m.distance < 0.5*n.distance:  # 厳選を実施
+        if m.distance < 0.7*n.distance:  # 厳選を実施
             good.append(m)
             good2.append([m])
     img1_pt = [list(map(int, kp1[m.queryIdx].pt))
@@ -42,10 +42,10 @@ def match_feature(img1, img2):
 os.chdir("exercise0627")
 current_dir=os.getcwd()
 # camera(current_dir+"/images",0)
-# img1=cv2.imread(current_dir+"/images/img1.jpg",cv2.IMREAD_GRAYSCALE)
-# img2=cv2.imread(current_dir+"/images/img2.jpg",cv2.IMREAD_GRAYSCALE)
-img1=cv2.imread(current_dir+"/einstein/einstein1.jpg",cv2.IMREAD_GRAYSCALE)
-img2=cv2.imread(current_dir+"/einstein/einstein2.jpg",cv2.IMREAD_GRAYSCALE)
+img1=cv2.imread(current_dir+"/images/img1.jpg",cv2.IMREAD_GRAYSCALE)
+img2=cv2.imread(current_dir+"/images/img2.jpg",cv2.IMREAD_GRAYSCALE)
+# img1=cv2.imread(current_dir+"/einstein/einstein1.jpg",cv2.IMREAD_GRAYSCALE)
+# img2=cv2.imread(current_dir+"/einstein/einstein2.jpg",cv2.IMREAD_GRAYSCALE)
 
 img1_pt_s, img2_pt_s = match_feature(img1, img2)
 F, mask = cv2.findFundamentalMat(img1_pt_s, img2_pt_s, cv2.RANSAC, 3, 0.99)
@@ -62,7 +62,7 @@ img1r = cv2.warpPerspective(img1, H1, (1080,720))
 img2r = cv2.warpPerspective(img2, H2, (1080,720))
 cv2.imwrite(current_dir+"/results/img1r.jpg",img1r)
 cv2.imwrite(current_dir+"/results/img2r.jpg",img2r)
-stereo = cv2.StereoBM_create(numDisparities=128, blockSize=9)
+stereo = cv2.StereoBM_create(numDisparities=128, blockSize=15)
 disparity = stereo.compute(img1r,img2r)
 pprint(disparity)
 print(disparity.max(),disparity.min(),disparity)
