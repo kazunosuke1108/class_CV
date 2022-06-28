@@ -121,7 +121,7 @@ interpolated=interpolate_disparity(np.float32(disparity))
 
 difference=interpolated-disparity
 cv2.imwrite(current_dir+"/results/diff_inter_disp.jpg",difference)
-cv2.imwrite(current_dir+"/results/img_interp.jpg",interpolated)
+cv2.imwrite(current_dir+"/results/interpolated.jpg",interpolated)
 
 
 """
