@@ -19,7 +19,7 @@ def match_feature(img1, img2):
     good = []  # オブジェクトの保管場所
     good2 = []  # オブジェクトの保管場所 drawMatchesKnnに食わせるための形式
     for m, n in matches:
-        if m.distance < 0.7*n.distance:  # 厳選を実施
+        if m.distance < 0.5*n.distance:  # 厳選を実施
             good.append(m)
             good2.append([m])
     img1_pt = [list(map(int, kp1[m.queryIdx].pt))
@@ -41,7 +41,7 @@ def match_feature(img1, img2):
     img2_pt_s = np.array(img2_pt_s)
     return img1_pt_s, img2_pt_s
 
-os.chdir("exercise0627")
+os.chdir("class_CV/exercise0627")
 current_dir=os.getcwd()
 # camera(current_dir+"/images",0)
 # img1=cv2.imread(current_dir+"/images/img1.jpg",cv2.IMREAD_GRAYSCALE)
@@ -78,6 +78,8 @@ disparity=(disparity-disparity.min())/(disparity.max()-disparity.min())*256
 cv2.imwrite(current_dir+"/results/img_disp.jpg", disparity)
 pprint(disparity)
 
+
+"""
 fig = plt.figure(figsize = (8, 8))
 ax = fig.add_subplot(111, projection='3d')
 ax.set_title("", size = 20)
@@ -87,8 +89,26 @@ ax.set_zlabel("z", size = 14, color = "r")
 Xmat=np.matlib.repmat(np.linspace(0,img1.shape[1],img1.shape[1]),img1.shape[0],1)
 Ymat=np.matlib.repmat(np.linspace(0,img1.shape[0],img1.shape[0]),img1.shape[1],1).T
 
-z=disparity
-print(Xmat.shape,Ymat.shape,z.shape)
-ax.plot(Xmat.reshape(1,-1), Ymat.reshape(1,-1), z.reshape(1,-1))
+X=[]
+Y=[]
+Z=[]
+z_ref=0
+for i,row in enumerate(disparity):
+    for j,pixel in enumerate(row):
+        if i%50==0 and j%50==0:
+            X.append(j)
+            Y.append(i)
+            if int(pixel)>100:
+                Z.append(pixel)
+                z_ref=pixel
+            else:
+                Z.append(pixel)
+        
+X=np.array(X)
+Y=np.array(Y)
+Z=np.array(Z)
 
-plt.show()
+print(X.shape,Y.shape,Z.shape)
+ax.scatter(X,Y,Z)
+
+plt.show()"""
