@@ -1,4 +1,5 @@
 from pprint import pprint
+from typing import Type
 import numpy as np
 import numpy.matlib
 import cv2
@@ -29,6 +30,7 @@ def match_feature(img1, img2):
                for m in good]  # マッチした２枚目の特徴点
     img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, good2,
                               None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)  # マッチ状況の描画
+    img3=cv2.cvtColor(img3,cv2.COLOR_RGB2BGR)
     plt.imshow(img3), plt.show()  # 確認のためマッチの様子を出力
 
     img1_pt_s = []  # 重複削除後のマッチした特徴点
@@ -50,8 +52,8 @@ current_dir = os.getcwd()
 # img2=cv2.imread(current_dir+"/images/img2.jpg",cv2.IMREAD_GRAYSCALE)
 # img1=cv2.imread(current_dir+"/einstein/einstein1.jpg",cv2.IMREAD_GRAYSCALE)
 # img2=cv2.imread(current_dir+"/einstein/einstein2.jpg",cv2.IMREAD_GRAYSCALE)
-img1 = cv2.imread(current_dir+"/sosokan/IMG_8573.jpg", cv2.IMREAD_GRAYSCALE)
-img2 = cv2.imread(current_dir+"/sosokan/IMG_8574.jpg", cv2.IMREAD_GRAYSCALE)
+img1 = cv2.imread(current_dir+"/sosokan/IMG_8573.jpg")#, cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread(current_dir+"/sosokan/IMG_8574.jpg")#, cv2.IMREAD_GRAYSCALE)
 # img1=cv2.imread(current_dir+"/fukinuke/IMG_8577.jpg",cv2.IMREAD_GRAYSCALE)
 # img2=cv2.imread(current_dir+"/fukinuke/IMG_8579.jpg",cv2.IMREAD_GRAYSCALE)
 # img1=cv2.imread(current_dir+"/tana/IMG_8592.jpg",cv2.IMREAD_GRAYSCALE)
@@ -105,17 +107,26 @@ def interpolate(i, imgL, imgR, disparity_raw):
             x_i = int((2 - i) * x1 + (i - 1) * x2)  # 左側画像と右側座標の間の位置を決定
             # 移動先が画像のサイズを超えていないか確認
             if 0 <= x_i < img_interp.shape[1] and 0 <= x2 < imgR.shape[1]:
-                img_interp[y, x_i] = int(
-                    (2 - i) * imgL[y, x1] + (i - 1) * imgR[y, x2])  # 　移動先の画素値を決定
+                for col in range (3):
+                    img_interp[y, x_i,col] = int(
+                        (2 - i) * imgL[y, x1,col] + (i - 1) * imgR[y, x2,col])  # 　移動先の画素値を決定
+                    if img_interp[y, x_i,col]==0:# 画素値が入っていなかった場合
+                        try:
+                            img_interp[y, x_i,col]=np.average(img_interp[y-1, x_i,col]+img_interp[y, x_i-1,col],img_interp[y-1, x_i-1,col])# 
+                        except TypeError:
+                            pass
+                        except np.AxisError:
+                            pass
     return img_interp.astype(np.uint8)
 
 
+"""
 for i in range(1, 10):
     deg = 1+i/10  # 左を１，右を２としたときのバーチャルカメラの位置
     # view interpolationを実行
-    img_interp = interpolate(deg, img1r, img2r, disparity_raw)
-    cv2.imwrite(
-        current_dir+f"/results/view_interpolation/img_interp{deg}.jpg", img_interp)
+"""
+img_interp = interpolate(1.5, img1r, img2r, disparity_raw)
+cv2.imwrite(current_dir+f"/results/view_interpolation/img_interp1.5_denoise.jpg", img_interp)
 
 
 # import disparity_interpolation
