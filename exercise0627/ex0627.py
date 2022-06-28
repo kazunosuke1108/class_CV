@@ -107,26 +107,29 @@ def interpolate(i, imgL, imgR, disparity_raw):
             x_i = int((2 - i) * x1 + (i - 1) * x2)  # 左側画像と右側座標の間の位置を決定
             # 移動先が画像のサイズを超えていないか確認
             if 0 <= x_i < img_interp.shape[1] and 0 <= x2 < imgR.shape[1]:
-                for col in range (3):
-                    img_interp[y, x_i,col] = int(
-                        (2 - i) * imgL[y, x1,col] + (i - 1) * imgR[y, x2,col])  # 　移動先の画素値を決定
-                    if img_interp[y, x_i,col]==0:# 画素値が入っていなかった場合
-                        try:
-                            img_interp[y, x_i,col]=np.average(img_interp[y-1, x_i,col]+img_interp[y, x_i-1,col],img_interp[y-1, x_i-1,col])# 
+                img_interp[y, x_i,:] = (2 - i) * imgL[y, x1,:] + (i - 1) * imgR[y, x2,:]  # 　移動先の画素値を決定
+                """# 自作しようとしたノイズ除去フィルタ。失敗のため実装していません。
+                if img_interp[y, x_i,col]<100:# 画素値が入っていなかった場合
+                    try:
+                        img_interp[y, x_i,:]=np.average(img_interp[y-1, x_i,:]+img_interp[y, x_i-1,:])# 
+                            #print(f"noise removed in {[y, x_i,col]}")
                         except TypeError:
                             pass
                         except np.AxisError:
                             pass
+                    else:
+                        #print(img_interp[y, x_i,col])
+                        pass
+                """
     return img_interp.astype(np.uint8)
 
 
-"""
+
 for i in range(1, 10):
     deg = 1+i/10  # 左を１，右を２としたときのバーチャルカメラの位置
     # view interpolationを実行
-"""
-img_interp = interpolate(1.5, img1r, img2r, disparity_raw)
-cv2.imwrite(current_dir+f"/results/view_interpolation/img_interp1.5_denoise.jpg", img_interp)
+    img_interp = interpolate(deg, img1r, img2r, disparity_raw)
+    cv2.imwrite(current_dir+f"/results/view_interpolation/img_interp{deg}.jpg", img_interp)
 
 
 # import disparity_interpolation
