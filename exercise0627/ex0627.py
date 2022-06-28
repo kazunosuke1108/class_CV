@@ -105,23 +105,23 @@ cv2.imwrite(current_dir+"/results/img_interp.jpg",img_interp)
 
 
 
-import disparity_interpolation
+# import disparity_interpolation
 
 
-def interpolate_disparity(disparity_map: np.array) -> np.array:
-    """Intepolate disparity image to inpaint holes.
-       The expected run time for a stereo image with 2056 x 2464 pixels is ~50 ms.
-    """
-    # Set the invalid disparity values defined as "0" to -1.
-    disparity_map[disparity_map == 0] = -1
-    disparity_map_interp = disparity_interpolation.disparity_interpolator(disparity_map)
-    return disparity_map_interp
+# def interpolate_disparity(disparity_map: np.array) -> np.array:
+#     """Intepolate disparity image to inpaint holes.
+#        The expected run time for a stereo image with 2056 x 2464 pixels is ~50 ms.
+#     """
+#     # Set the invalid disparity values defined as "0" to -1.
+#     disparity_map[disparity_map == 0] = -1
+#     disparity_map_interp = disparity_interpolation.disparity_interpolator(disparity_map)
+#     return disparity_map_interp
 
-interpolated=interpolate_disparity(np.float32(disparity))
+# interpolated=interpolate_disparity(np.float32(disparity))
 
-difference=interpolated-disparity
-cv2.imwrite(current_dir+"/results/diff_inter_disp.jpg",difference)
-cv2.imwrite(current_dir+"/results/interpolated.jpg",interpolated)
+# difference=interpolated-disparity
+# cv2.imwrite(current_dir+"/results/diff_inter_disp.jpg",difference)
+# cv2.imwrite(current_dir+"/results/interpolated.jpg",interpolated)
 
 
 """
