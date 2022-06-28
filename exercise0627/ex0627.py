@@ -101,7 +101,7 @@ def interpolate(i, imgL, imgR, disparity_raw):
         for x1 in range(imgL.shape[1]):  # 画像の横方向
             if y % 100 == 0 and x1 % 100 == 0:
                 print("current process: ", y, x1)
-            x2 = int(x1 - disparity[y, x1])  # 左側画像に対応する点の右側座標を取得
+            x2 = int(x1 - disparity_raw[y, x1])  # 左側画像に対応する点の右側座標を取得
             x_i = int((2 - i) * x1 + (i - 1) * x2)  # 左側画像と右側座標の間の位置を決定
             # 移動先が画像のサイズを超えていないか確認
             if 0 <= x_i < img_interp.shape[1] and 0 <= x2 < imgR.shape[1]:
