@@ -82,6 +82,29 @@ disparity=(disparity-disparity.min())/(disparity.max()-disparity.min())*256
 # disparity=cv2.filter2D(disparity,-1,kernel)
 cv2.imwrite(current_dir+"/results/img_disp.jpg", disparity)
 
+def interpolate(i, imgL, imgR, disparity):
+    img_interp = np.zeros_like(imgL)
+    for y in range(imgL.shape[0]):
+        for x1 in range(imgL.shape[1]):
+            if y%10==0 and x1%10==0:
+                print("current process: ",y,x1)
+            x2 = int(x1 - disparity[y, x1])
+            x_i = int((2 - i) * x1 + (i - 1) * x2)
+            if 0 <= x_i < img_interp.shape[1] and 0 <= x2 < imgR.shape[1]:
+                img_interp[y, x_i] = int((2 - i) * imgL[y, x1] + (i - 1) * imgR[y, x2])
+    return img_interp.astype(np.uint8)
+
+img_interp = interpolate(1.5, img1r, img2r, disparity)
+cv2.imwrite(current_dir+"/results/img_interp.jpg",img_interp)
+
+
+
+
+
+
+
+
+
 import disparity_interpolation
 
 
