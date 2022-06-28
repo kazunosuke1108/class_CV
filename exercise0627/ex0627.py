@@ -63,23 +63,28 @@ print("F matrix\n",F)
 
 # K=np.array([[842.50011162,0.,578.89029916],[0.,801.01078582,246.00138272],[0.,0.,1.]]) # 広角カメラ
 K=np.array([[2.93374279e+03, 0.00000000e+00, 1.96523556e+03],[0.00000000e+00, 2.94658602e+03, 1.43472275e+03],[0.00000000e+00, 0.00000000e+00, 1.00000000e+00]]) # 通常カメラ
-E = K.T.dot(F).dot(K)
+E = K.T.dot(F).dot(K)# essential matrix
 print("K matrix\n",K)
 
-retval, H1, H2 = cv2.stereoRectifyUncalibrated(img1_pt_s, img2_pt_s, F, img1.shape[:2])
+retval, H1, H2 = cv2.stereoRectifyUncalibrated(img1_pt_s, img2_pt_s, F, img1.shape[:2])# H matrix for rectification
 print("H1 matrix\n",H1)
 print("H2 matrix\n",H2)
-img1r = cv2.warpPerspective(img1, H1, [img1.shape[1],img1.shape[0]])
+img1r = cv2.warpPerspective(img1, H1, [img1.shape[1],img1.shape[0]])# rectify the original image
 img2r = cv2.warpPerspective(img2, H2, [img2.shape[1],img2.shape[0]])
 cv2.imwrite(current_dir+"/results/img1r.jpg",img1r)
 cv2.imwrite(current_dir+"/results/img2r.jpg",img2r)
-stereo = cv2.StereoSGBM_create(numDisparities=32, blockSize=9)
-disparity = stereo.compute(img1r,img2r)
+
+stereo = cv2.StereoSGBM_create(numDisparities=32, blockSize=9)# インスタンス化
+disparity = stereo.compute(img1r,img2r)# rectificationしたあとの画像から、disparity画像を生成
+cv2.imwrite(current_dir+"/results/img_disp_raw.jpg", disparity)
 print(disparity.max(),disparity.min())
-disparity=(disparity-disparity.min())/(disparity.max()-disparity.min())*256
-# cv2.GaussianBlur(disparity,(299,299),0)
-# kernel=np.ones((10,10),np.float32)/100
-# disparity=cv2.filter2D(disparity,-1,kernel)
+disparity=(disparity-disparity.min())/(disparity.max()-disparity.min())*256 # 正規化（0から255へ）
+kernel=np.ones((10,10),np.float32)/100# ノイズ除去のため平均化フィルタ実装
+disparity=cv2.filter2D(disparity,-1,kernel)
+cv2.GaussianBlur(disparity,(299,299),0)# ノイズ除去のためガウシアンフィルタ実装
+kernel=np.ones((10,10),np.float32)/100# ノイズ除去のため平均化フィルタ実装
+disparity=cv2.filter2D(disparity,-1,kernel)
+cv2.GaussianBlur(disparity,(299,299),0)# ノイズ除去のためガウシアンフィルタ実装
 cv2.imwrite(current_dir+"/results/img_disp.jpg", disparity)
 
 def interpolate(i, imgL, imgR, disparity):
@@ -95,7 +100,7 @@ def interpolate(i, imgL, imgR, disparity):
     return img_interp.astype(np.uint8)
 
 img_interp = interpolate(1.5, img1r, img2r, disparity)
-cv2.imwrite(current_dir+"/results/img_interp.jpg",img_interp)
+cv2.imwrite(current_dir+"/results/view_interpolation/img_interp.jpg",img_interp)
 
 
 
