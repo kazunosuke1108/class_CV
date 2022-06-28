@@ -73,14 +73,32 @@ img1r = cv2.warpPerspective(img1, H1, [img1.shape[1],img1.shape[0]])
 img2r = cv2.warpPerspective(img2, H2, [img2.shape[1],img2.shape[0]])
 cv2.imwrite(current_dir+"/results/img1r.jpg",img1r)
 cv2.imwrite(current_dir+"/results/img2r.jpg",img2r)
-stereo = cv2.StereoBM_create(numDisparities=48, blockSize=9)
+stereo = cv2.StereoSGBM_create(numDisparities=32, blockSize=9)
 disparity = stereo.compute(img1r,img2r)
 print(disparity.max(),disparity.min())
 disparity=(disparity-disparity.min())/(disparity.max()-disparity.min())*256
+# cv2.GaussianBlur(disparity,(299,299),0)
 # kernel=np.ones((10,10),np.float32)/100
 # disparity=cv2.filter2D(disparity,-1,kernel)
-cv2.GaussianBlur(disparity,(65,65),0)
 cv2.imwrite(current_dir+"/results/img_disp.jpg", disparity)
+
+import disparity_interpolation
+
+
+def interpolate_disparity(disparity_map: np.array) -> np.array:
+    """Intepolate disparity image to inpaint holes.
+       The expected run time for a stereo image with 2056 x 2464 pixels is ~50 ms.
+    """
+    # Set the invalid disparity values defined as "0" to -1.
+    disparity_map[disparity_map == 0] = -1
+    disparity_map_interp = disparity_interpolation.disparity_interpolator(disparity_map)
+    return disparity_map_interp
+
+interpolated=interpolate_disparity(np.float32(disparity))
+
+difference=interpolated-disparity
+cv2.imwrite(current_dir+"/results/diff_inter_disp.jpg",difference)
+cv2.imwrite(current_dir+"/results/img_interp.jpg",interpolated)
 
 
 """
@@ -106,13 +124,13 @@ for i,row in enumerate(disparity):
                 Z.append(pixel)
                 z_ref=pixel
             else:
-                Z.append(pixel)
+                Z.append(np.nan)
         
 X=np.array(X)
 Y=np.array(Y)
 Z=np.array(Z)
 
 print(X.shape,Y.shape,Z.shape)
-ax.scatter(X,Y,Z)
+ax.scatter(X,Y,Z,c=Z,cmap="Greys")
 
 plt.show()"""
