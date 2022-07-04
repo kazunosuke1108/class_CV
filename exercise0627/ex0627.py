@@ -1,5 +1,4 @@
 from pprint import pprint
-from typing import Type
 import numpy as np
 import numpy.matlib
 import cv2
