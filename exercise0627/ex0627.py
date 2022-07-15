@@ -183,3 +183,4 @@ print(X.shape,Y.shape,Z.shape)
 ax.scatter(X,Y,Z,c=Z,cmap="Greys")
 
 plt.show()"""
+

@@ -85,3 +85,9 @@ for i in range(len(final_path)-1):
     cv2.imwrite(current_dir+"/results/img1r.jpg", img1r)
     cv2.imwrite(current_dir+"/results/img2r.jpg", img2r)
     disparity_raw,disparity=crt_disparity(img1r,img2r)
+"""
+アイデアメモ
+・できてる・できていないを表示させる
+→できていたら、その２枚目を次の１枚目にして、続ける。よかったやつはよかったやつとして残す。
+→できていなかったら、２枚目を次の画像に変える。
+"""
