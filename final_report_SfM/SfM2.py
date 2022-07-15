@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import os
 from camera import camera
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.widgets as wg
 
 def match_feature(img1, img2):
     # SIFTを用意
@@ -28,10 +29,10 @@ def match_feature(img1, img2):
                for m in good]  # マッチした１枚目の特徴点
     img2_pt = [list(map(int, kp2[m.trainIdx].pt))
                for m in good]  # マッチした２枚目の特徴点
-    img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, good2,
-                              None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)  # マッチ状況の描画
-    img3=cv2.cvtColor(img3,cv2.COLOR_RGB2BGR)
-    plt.imshow(img3), plt.show()  # 確認のためマッチの様子を出力
+    # img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, good2,
+    #                           None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)  # マッチ状況の描画
+    # img3=cv2.cvtColor(img3,cv2.COLOR_RGB2BGR)
+    # plt.imshow(img3), plt.show()  # 確認のためマッチの様子を出力
 
     img1_pt_s = []  # 重複削除後のマッチした特徴点
     img2_pt_s = []
@@ -60,6 +61,43 @@ def crt_disparity(img1r,img2r,):
     
     return disparity_raw,disparity
 
+def crt_checker(img1,img2,img3,img4,img5,img6):
+    global approval
+    approval=False
+    fig=plt.figure(figsize=(10,10))
+    imgs=[img1,img2,img3,img4,img5,img6]
+    titles=["input 1","input 2","rectified 1","rectified 2","disparity raw","disparity"]
+    X=4
+    Y=2
+    for i,(img,title) in enumerate(zip(imgs,titles)):
+        ax=fig.add_subplot(X,Y,i+1)
+        ax.set_title(title)
+        plt.imshow(img)
+    del ax
+    axcolor = 'lightgoldenrodyellow'
+    ax1 = plt.axes([0.2, 0.1, 0.15, 0.05])
+    ax2 = plt.axes([0.7, 0.1, 0.15, 0.05])
+    btn1 = wg.Button(ax1, 'approve', color=axcolor, hovercolor='0')
+    btn2 = wg.Button(ax2, 'deny', color=axcolor, hovercolor='1')
+    def approve(self):
+        print("matching succeeded")
+        plt.close('all')
+        global approval
+        approval=True
+    def deny(self):
+        print("matching failed")
+        plt.close('all')
+        global approval
+        approval=False
+
+
+    approval=btn1.on_clicked(approve)
+    approval=btn2.on_clicked(deny)
+    plt.show()
+    return approval
+
+
+
 # 
 os.chdir("final_report_SfM")
 current_dir = os.getcwd()
@@ -85,9 +123,13 @@ for i in range(len(final_path)-1):
     cv2.imwrite(current_dir+"/results/img1r.jpg", img1r)
     cv2.imwrite(current_dir+"/results/img2r.jpg", img2r)
     disparity_raw,disparity=crt_disparity(img1r,img2r)
+    check=crt_checker(img1,img2,img1r,img2r,disparity_raw,disparity)
+    print(check)
 """
 アイデアメモ
 ・できてる・できていないを表示させる
 →できていたら、その２枚目を次の１枚目にして、続ける。よかったやつはよかったやつとして残す。
 →できていなかったら、２枚目を次の画像に変える。
+・できているものだけでSfMをやるか、view morphingをするかして、最終的に14棟をぐるっと一周
 """
+
