@@ -166,6 +166,9 @@ for i in np.arange(1,len(images_path)):
     except TypeError:
         check=False
         print("### TYPE ERROR ###")
+    except ValueError:
+        check=False
+        print('### ValueError ###')
     except cv2.error:
         check=False
         print("### CV2 ERROR ###")
