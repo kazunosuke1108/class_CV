@@ -1,6 +1,7 @@
 # 
 
 from pprint import pprint
+from tracemalloc import start
 import numpy as np
 import glob
 import cv2
@@ -22,7 +23,7 @@ def match_feature(img1, img2):
     good = []  # オブジェクトの保管場所
     good2 = []  # オブジェクトの保管場所 drawMatchesKnnに食わせるための形式
     for m, n in matches:
-        if m.distance < 0.3*n.distance:  # 厳選を実施
+        if m.distance < 0.7*n.distance:  # 厳選を実施
             good.append(m)
             good2.append([m])
     img1_pt = [list(map(int, kp1[m.queryIdx].pt))
@@ -97,24 +98,101 @@ def crt_checker(img1,img2,img3,img4,img5,img6):
     return approval
 
 
+def interpolate(i, imgL, imgR, disparity_raw):
+    img_interp = np.zeros_like(imgL)  # 描画のキャンバスを用意
+    for y in range(imgL.shape[0]):  # 画像の縦方向
+        for x1 in range(imgL.shape[1]):  # 画像の横方向
+            if y % 100 == 0 and x1 % 100 == 0:
+                print("current process: ", y, x1)
+            x2 = int(x1 - disparity_raw[y, x1])  # 左側画像に対応する点の右側座標を取得
+            x_i = int((2 - i) * x1 + (i - 1) * x2)  # 左側画像と右側座標の間の位置を決定
+            # 移動先が画像のサイズを超えていないか確認
+            if 0 <= x_i < img_interp.shape[1] and 0 <= x2 < imgR.shape[1]:
+                img_interp[y, x_i,:] = (2 - i) * imgL[y, x1,:] + (i - 1) * imgR[y, x2,:]  # 　移動先の画素値を決定
+    return img_interp.astype(np.uint8)
 
+def match_to_disparity(img1,img2):
+    img1_pt_s, img2_pt_s, F = match_feature(img1,img2)
+    E = K.T.dot(F).dot(K)
+    retval, H1, H2 = cv2.stereoRectifyUncalibrated(img1_pt_s, img2_pt_s, F, img1.shape[:2])
+    img1r = cv2.warpPerspective(img1, H1, [img1.shape[1], img1.shape[0]])
+    img2r = cv2.warpPerspective(img2, H2, [img2.shape[1], img2.shape[0]])
+    cv2.imwrite(current_dir+"/results/img1r.jpg", img1r)
+    cv2.imwrite(current_dir+"/results/img2r.jpg", img2r)
+    disparity_raw,disparity=crt_disparity(img1r,img2r)
+    return img1,img2,img1r,img2r,disparity_raw,disparity 
 # 
 os.chdir("final_report_SfM")
 current_dir = os.getcwd()
 print(current_dir) # /home/ytpc2019a/code_ws/class_CV/final_report_SfM
 
-final_path=sorted(glob.glob(current_dir+"/images/*"))
+images_path=sorted(glob.glob(current_dir+"/images/images3/*"))
 
-print(final_path)
+good_images=sorted(glob.glob(current_dir+"/images/good_images/*"))
+print(good_images)
+
+last_good_image=os.path.basename(good_images[-1])
+start_no=0
+for i,path in enumerate(images_path):
+    if last_good_image in path:
+        start_no=i
+        break
+
+images_path=images_path[start_no+1:]
+print("start with good image : ",last_good_image)
 
 # parameter
 K=np.array([[842.50011162,0.,578.89029916],[0.,801.01078582,246.00138272],[0.,0.,1.]])
 
 
+# 最初の1セット
+j=0
+for i in np.arange(1,len(images_path)):
+    j+=1
+    print("comparing :",os.path.basename(sorted(glob.glob(current_dir+"/images/good_images/*")[-1])),os.path.basename(images_path[i]))
+    img1=cv2.imread(sorted(glob.glob(current_dir+"/images/good_images/*")[-1]))
+    img2=cv2.imread(images_path[i])
+    img2_name=os.path.basename(images_path[i])
+    try:
+        img1,img2,img1r,img2r,disparity_raw,disparity=match_to_disparity(img1,img2)
+        if int(np.average(img1r[0][640]))==0 :#cor int(np.average(img1r[360][640]))==0:
+            check=False
+            j=0
+        else:
+            try:
+                check=crt_checker(img1,img2,img1r,img2r,disparity_raw,disparity)
+            except cv2.error:
+                print("### CV2 ERROR ###")
+                check=False
+    except TypeError:
+        check=False
+        print("### TYPE ERROR ###")
+    except cv2.error:
+        check=False
+        print("### CV2 ERROR ###")
+    print(check)
 
-for i in range(len(final_path)-1):
-    img1=cv2.imread(final_path[i])
-    img2=cv2.imread(final_path[i+1])
+    if check or j>10:
+        good_images.append(images_path[i])
+        cv2.imwrite(current_dir+f"/images/good_images/{img2_name}",img2)
+
+print(images_path)
+print(good_images)
+
+
+
+for i in range(len(good_images)-1):
+    img1=cv2.imread(good_images[i])
+    img2=cv2.imread(good_images[i+1])
+    # view interpolationを実行
+    img_interp = interpolate(1.5,img1r, img2r, disparity_raw)
+    cv2.imwrite(current_dir+f"/results/view_interpolation/img_interp{1.5}.jpg", img_interp)
+
+
+"""
+for i in range(len(images_path)-1):
+    img1=cv2.imread(images_path[i])
+    img2=cv2.imread(images_path[i+1])
     img1_pt_s, img2_pt_s, F = match_feature(img1,img2)
     E = K.T.dot(F).dot(K)
     retval, H1, H2 = cv2.stereoRectifyUncalibrated(img1_pt_s, img2_pt_s, F, img1.shape[:2])
@@ -126,10 +204,23 @@ for i in range(len(final_path)-1):
     check=crt_checker(img1,img2,img1r,img2r,disparity_raw,disparity)
     print(check)
 """
+
+"""
 アイデアメモ
 ・できてる・できていないを表示させる
 →できていたら、その２枚目を次の１枚目にして、続ける。よかったやつはよかったやつとして残す。
 →できていなかったら、２枚目を次の画像に変える。
 ・できているものだけでSfMをやるか、view morphingをするかして、最終的に14棟をぐるっと一周
+
+並んだ②枚を出す
+img1が前で、img2が後ろ
+・マッチできていたら
+    img2を登録する
+    img1は登録済みのはず
+    img2をimg1にする
+・できてなかったら
+    img2は飛ばす
+    img1は保持したまま、img2を次の画像にする
+
 """
 
