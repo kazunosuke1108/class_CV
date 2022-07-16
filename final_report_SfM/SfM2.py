@@ -23,7 +23,7 @@ def match_feature(img1, img2):
     good = []  # オブジェクトの保管場所
     good2 = []  # オブジェクトの保管場所 drawMatchesKnnに食わせるための形式
     for m, n in matches:
-        if m.distance < 0.7*n.distance:  # 厳選を実施
+        if m.distance < 0.5*n.distance:  # 厳選を実施
             good.append(m)
             good2.append([m])
     img1_pt = [list(map(int, kp1[m.queryIdx].pt))
@@ -149,15 +149,14 @@ K=np.array([[842.50011162,0.,578.89029916],[0.,801.01078582,246.00138272],[0.,0.
 j=0
 for i in np.arange(1,len(images_path)):
     j+=1
-    print("comparing :",os.path.basename(sorted(glob.glob(current_dir+"/images/good_images/*")[-1])),os.path.basename(images_path[i]))
-    img1=cv2.imread(sorted(glob.glob(current_dir+"/images/good_images/*")[-1]))
+    print("comparing :",os.path.basename(sorted(glob.glob(current_dir+"/images/good_images/*"))[-1]),os.path.basename(images_path[i]))
+    img1=cv2.imread(sorted(glob.glob(current_dir+"/images/good_images/*"))[-1])
     img2=cv2.imread(images_path[i])
     img2_name=os.path.basename(images_path[i])
     try:
         img1,img2,img1r,img2r,disparity_raw,disparity=match_to_disparity(img1,img2)
-        if int(np.average(img1r[0][640]))==0 :#cor int(np.average(img1r[360][640]))==0:
+        if int(np.average(img1r[0][640]))==0 or int(np.average(img2r[0][640]))==0:
             check=False
-            j=0
         else:
             try:
                 check=crt_checker(img1,img2,img1r,img2r,disparity_raw,disparity)
@@ -173,6 +172,7 @@ for i in np.arange(1,len(images_path)):
     print(check)
 
     if check or j>10:
+        j=0
         good_images.append(images_path[i])
         cv2.imwrite(current_dir+f"/images/good_images/{img2_name}",img2)
 
