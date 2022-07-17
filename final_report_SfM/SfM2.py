@@ -2,6 +2,7 @@
 
 from pprint import pprint
 from tracemalloc import start
+from typing import Type
 import numpy as np
 import glob
 import cv2
@@ -102,8 +103,8 @@ def interpolate(i, imgL, imgR, disparity_raw):
     img_interp = np.zeros_like(imgL)  # 描画のキャンバスを用意
     for y in range(imgL.shape[0]):  # 画像の縦方向
         for x1 in range(imgL.shape[1]):  # 画像の横方向
-            if y % 100 == 0 and x1 % 100 == 0:
-                print("current process: ", y, x1)
+            # if y % 100 == 0 and x1 % 100 == 0:
+            #     print("current process: ", y, x1)
             x2 = int(x1 - disparity_raw[y, x1])  # 左側画像に対応する点の右側座標を取得
             x_i = int((2 - i) * x1 + (i - 1) * x2)  # 左側画像と右側座標の間の位置を決定
             # 移動先が画像のサイズを超えていないか確認
@@ -140,11 +141,11 @@ for i,path in enumerate(images_path):
 
 images_path=images_path[start_no+1:]
 print("start with good image : ",last_good_image)
-
 # parameter
 K=np.array([[842.50011162,0.,578.89029916],[0.,801.01078582,246.00138272],[0.,0.,1.]])
 
 
+"""
 # 最初の1セット
 j=0
 for i in np.arange(1,len(images_path)):
@@ -178,19 +179,47 @@ for i in np.arange(1,len(images_path)):
         j=0
         good_images.append(images_path[i])
         cv2.imwrite(current_dir+f"/images/good_images/{img2_name}",img2)
-
+"""
 print(images_path)
 print(good_images)
 
 
+interpolated_images=sorted(glob.glob(current_dir+"/results/view_interpolation/*"))
 
 for i in range(len(good_images)-1):
     img1=cv2.imread(good_images[i])
     img2=cv2.imread(good_images[i+1])
     # view interpolationを実行
-    img_interp = interpolate(1.5,img1r, img2r, disparity_raw)
-    cv2.imwrite(current_dir+f"/results/view_interpolation/img_interp{1.5}.jpg", img_interp)
+    img1_no=int(os.path.basename(good_images[i])[:-4])
+    img2_no=int(os.path.basename(good_images[i+1])[:-4])
 
+    no_calc=False
+    for existing in interpolated_images:
+        if str(img1_no) in existing:
+            no_calc=True
+            print("already calculated : ",img1_no)
+            break
+
+    if no_calc:
+        continue            
+
+    diff=int((img2_no-img1_no)/10)
+    interpolate_list=[1.0,]
+    print(diff)
+    gap=1/diff
+    while interpolate_list[-1]+gap<1.991:
+        interpolate_list.append(interpolate_list[-1]+gap)
+    print(interpolate_list)
+    try:
+        img1,img2,img1r,img2r,disparity_raw,disparity=match_to_disparity(img1,img2)
+        for ratio in interpolate_list:
+            print(f"interpolation : img={img1_no} ratio={ratio}")
+            img_interp = interpolate(ratio,img1r, img2r, disparity_raw)
+            cv2.imwrite(current_dir+f"/results/view_interpolation/{img1_no}_{str(ratio)[0]}-{str(ratio)[2:4].ljust(2,'0')}.jpg", img_interp)
+    except TypeError:
+        print("### TYPE ERROR ###")
+    except cv2.error:
+        print("### CV2 ERROR ###")
 
 """
 for i in range(len(images_path)-1):
@@ -224,6 +253,16 @@ img1が前で、img2が後ろ
 ・できてなかったら
     img2は飛ばす
     img1は保持したまま、img2を次の画像にする
+
+
+
+view interpolationでgood imagesに入っていない画像を復元する
+
+00300.pngと00340.pngの間には,10,20,30の3枚があるはず。
+(340-300)/10-1=3
+1.0,1.25,1.5,1.75,2.0
+のはず。
+1/(1+3)=0.25
 
 """
 
