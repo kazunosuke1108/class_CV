@@ -134,10 +134,10 @@ print(good_images)
 
 last_good_image=os.path.basename(good_images[-1])
 start_no=0
-for i,path in enumerate(images_path):
+"""for i,path in enumerate(images_path):
     if last_good_image in path:
         start_no=i
-        break
+        break"""
 
 images_path=images_path[start_no+1:]
 print("start with good image : ",last_good_image)
@@ -145,7 +145,7 @@ print("start with good image : ",last_good_image)
 K=np.array([[842.50011162,0.,578.89029916],[0.,801.01078582,246.00138272],[0.,0.,1.]])
 
 
-"""
+
 # 最初の1セット
 j=0
 for i in np.arange(1,len(images_path)):
@@ -179,7 +179,7 @@ for i in np.arange(1,len(images_path)):
         j=0
         good_images.append(images_path[i])
         cv2.imwrite(current_dir+f"/images/good_images/{img2_name}",img2)
-"""
+
 print(images_path)
 print(good_images)
 
