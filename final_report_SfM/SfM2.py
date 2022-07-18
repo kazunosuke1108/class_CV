@@ -215,11 +215,16 @@ for i in range(len(good_images)-1):
         for ratio in interpolate_list:
             print(f"interpolation : img={img1_no} ratio={ratio}")
             img_interp = interpolate(ratio,img1r, img2r, disparity_raw)
-            cv2.imwrite(current_dir+f"/results/view_interpolation/{img1_no}_{str(ratio)[0]}-{str(ratio)[2:4].ljust(2,'0')}.jpg", img_interp)
+            cv2.imwrite(current_dir+f"/results/view_interpolation/{str(img1_no).zfill(5)}_{str(ratio)[0]}-{str(ratio)[2:4].ljust(2,'0')}.jpg", img_interp)
     except TypeError:
         print("### TYPE ERROR ###")
     except cv2.error:
         print("### CV2 ERROR ###")
+
+
+
+
+
 
 """
 for i in range(len(images_path)-1):
@@ -264,5 +269,10 @@ view interpolationでgood imagesに入っていない画像を復元する
 のはず。
 1/(1+3)=0.25
 
+
+画像自体は生成できた。
+・枚数があってない
+    エラーが出たところはそのまますっ飛ばしたから
+・ノイズがひどい
 """
 
