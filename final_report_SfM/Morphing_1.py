@@ -133,6 +133,7 @@ good_images=sorted(glob.glob(current_dir+"/images/good_images/*"))
 print(good_images)
 
 last_good_image=os.path.basename(good_images[-1])
+last_good_image="00300.png"
 start_no=0
 """for i,path in enumerate(images_path):
     if last_good_image in path:
