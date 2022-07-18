@@ -7,7 +7,7 @@ import numpy as np
 os.chdir("final_report_SfM")
 current_dir = os.getcwd()
 
-def crt_results(path1,path2,title1="original image",title2="interpolated image",color=""):
+def crt_results(path1,path2,save,title1="original image",title2="interpolated image",color=""):
     fig=plt.figure(figsize=(7,3))
     img1=cv2.imread(path1)
     ax1=fig.add_subplot(1,2,1)
@@ -25,11 +25,10 @@ def crt_results(path1,path2,title1="original image",title2="interpolated image",
         ax2.set_title(title2)
     ax2.axis("off")
     plt.imshow(img2)
-    plt.savefig(current_dir+"/results/comparison_movie/test.png")
+    plt.savefig(save)
     pass
 
 
-"""
 """
 interpolated_images=sorted(glob.glob(current_dir+"/results/view_interpolation/*"))
 interpolated_nos=[]
@@ -44,23 +43,33 @@ for original_image in original_images:
     try:
         interpolated_no=interpolated_nos[0]
         interpolated_image=interpolated_images[0]
+        savepath=current_dir+f"/results/comparison_images/{original_no}_{os.path.basename(interpolated_image)}"
     except IndexError:
         print(original_no,"XXXXX","NO MATCH (interpolated empty)")
         break
     if original_no==interpolated_no:
         print(original_no,interpolated_no,"PERFECT MATCH")
-        crt_results(original_image,interpolated_image,title1=f"original no.{original_no}",title2=f"original no.{interpolated_no}")
+        crt_results(original_image,interpolated_image,save=savepath,title1=f"original no.{original_no}",title2=f"original no.{interpolated_no}")
         interpolated_nos=interpolated_nos[1:]
         interpolated_images=interpolated_images[1:]
     elif int(original_no)<int(interpolated_no):
-        crt_results(original_image,None,title1=f"original no.{original_no}",title2=f"interp. (failed) no.{interpolated_no}")
+        crt_results(original_image,None,save=savepath,title1=f"original no.{original_no}",title2=f"interp. (failed) no.{interpolated_no}")
         print(original_no,"XXXXX","NO MATCH (INTERPOLATION FAILED)")
     elif int(original_no)>int(interpolated_no):
-        crt_results(original_image,interpolated_image,title1=f"original no.{original_no}",title2=f"interp. no.{interpolated_no}",color="red")
+        crt_results(original_image,interpolated_image,save=savepath,title1=f"original no.{original_no}",title2=f"interp. no.{interpolated_no}",color="red")
         print(original_no,interpolated_no,"INTERPOLATION MATCH")
         interpolated_nos=interpolated_nos[1:]
         interpolated_images=interpolated_images[1:]
     else:
         print("### ERROR ###")
 
+"""
 
+comparison_images=sorted(glob.glob(current_dir+"/results/comparison_images/*"))
+
+fourcc = cv2.VideoWriter_fourcc('m','p','4', 'v')
+video  = cv2.VideoWriter(current_dir+'/results/comparison_movie/comparison.mp4', fourcc, 10.0, (700, 300))
+
+for comparison_image in comparison_images:
+    img = cv2.imread(comparison_image)
+    video.write(img)
