@@ -29,7 +29,7 @@ def crt_results(path1,path2,save,title1="original image",title2="interpolated im
     pass
 
 
-"""
+
 interpolated_images=sorted(glob.glob(current_dir+"/results/view_interpolation/*"))
 interpolated_nos=[]
 for interpolated_image in interpolated_images:
@@ -63,7 +63,7 @@ for original_image in original_images:
     else:
         print("### ERROR ###")
 
-"""
+
 
 comparison_images=sorted(glob.glob(current_dir+"/results/comparison_images/*"))
 
