@@ -135,10 +135,10 @@ print(good_images)
 last_good_image=os.path.basename(good_images[-1])
 last_good_image="00300.png"
 start_no=0
-"""for i,path in enumerate(images_path):
+for i,path in enumerate(images_path):
     if last_good_image in path:
         start_no=i
-        break"""
+        break
 
 images_path=images_path[start_no+1:]
 print("start with good image : ",last_good_image)
